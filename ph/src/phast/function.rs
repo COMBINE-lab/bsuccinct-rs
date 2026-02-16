@@ -220,9 +220,10 @@ impl<SC, SS: SeedSize, CA, S> GetSize for Function<SS, SC, CA, S> where CA: GetS
 impl<SS: SeedSize, SC: SeedChooser, CA: CompressedArray, S: BuildSeededHasher> Function<SS, SC, CA, S> {
     
     /// Returns value assigned to the given `key`.
-    /// 
+    ///
     /// The returned value is in the range from `0` (inclusive) to the number of elements in the input key collection (exclusive).
-    /// `key` must come from the input key collection given during construction.
+    /// `key` should come from the input key collection given during construction.
+    /// For keys not in the collection, returns `usize::MAX`.
     #[inline(always)]   //inline(always) is important here
     pub fn get<K>(&self, key: &K) -> usize where K: Hash + ?Sized {
         /* TODO turbo support: let slice_begin = self.level0.slice_begin(key_hash);
@@ -241,7 +242,7 @@ impl<SS: SeedSize, SC: SeedChooser, CA: CompressedArray, S: BuildSeededHasher> F
                 return self.unassigned.get(self.seed_chooser.f(key_hash, seed, &l.seeds.conf) + l.shift)
             }
         }
-        unreachable!()
+        usize::MAX
     }
 
     /// Constructs [`Function`] for given `keys`, using a single thread and given parameters:
